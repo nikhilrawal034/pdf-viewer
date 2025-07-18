@@ -232,22 +232,36 @@
 
             try {
                 // Get the page from the PDF document
+                console.log('Fetching page:', num);
                 const page = await pdfDoc.getPage(num);
+                console.log('Page object:', page);
+                console.log('Page inherent rotation:', page.rotation);
+
 
                 // Determine the desired scale based on current zoom and container width
                 const containerWidth = canvas.parentElement.clientWidth;
-                const viewport = page.getViewport({ scale: 1 });
+                // Explicitly use page.rotation for initial viewport to ensure correct orientation
+                const viewport = page.getViewport({ scale: 1, rotation: page.rotation });
+                console.log('Initial viewport dimensions (scale 1):', viewport.width, 'x', viewport.height, 'rotation:', viewport.rotation);
+
                 // Calculate base scale to fit width, then apply current zoom
                 let baseScale = containerWidth / viewport.width;
 
                 // Adjust baseScale if in fullscreen to fit height or width, whichever is smaller
                 if (document.fullscreenElement === pdfViewer) {
                     const viewerRect = pdfViewer.getBoundingClientRect();
-                    const heightScale = viewerRect.height / viewport.height;
-                    baseScale = Math.min(viewerRect.width / viewport.width, viewerRect.height / viewport.height);
+                    // Calculate scale to fit both width and height within the fullscreen viewer
+                    const scaleX = viewerRect.width / viewport.width;
+                    const scaleY = viewerRect.height / viewport.height;
+                    baseScale = Math.min(scaleX, scaleY);
+                    console.log('Fullscreen viewer dimensions:', viewerRect.width, 'x', viewerRect.height);
+                    console.log('Fullscreen baseScale (min of width/height fit):', baseScale);
                 }
 
-                const scaledViewport = page.getViewport({ scale: baseScale * currentScale });
+                // Create the scaled viewport, explicitly using page.rotation
+                const scaledViewport = page.getViewport({ scale: baseScale * currentScale, rotation: page.rotation });
+                console.log('Scaled viewport dimensions (final):', scaledViewport.width, 'x', scaledViewport.height, 'rotation:', scaledViewport.rotation);
+
 
                 // Set canvas dimensions
                 canvas.height = scaledViewport.height;
@@ -268,7 +282,7 @@
                 }
             } catch (error) {
                 console.error('Error during page rendering:', error);
-                loadingMessage.textContent = 'Error loading PDF.';
+                loadingMessage.textContent = 'Error loading page.';
             } finally {
                 loadingMessage.classList.add('hidden'); // Hide loading message
                 currentPageNumSpan.textContent = num; // Update current page number display

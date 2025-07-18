@@ -171,7 +171,7 @@
         const pageInfo = document.getElementById('pageInfo');
         const controlsBottomRight = document.getElementById('controlsBottomRight'); // New container for zoom and fullscreen
         const zoomInBtn = document.getElementById('zoomIn');
-        const zoomOutBtn = document = document.getElementById('zoomOut');
+        const zoomOutBtn = document.getElementById('zoomOut'); // Corrected typo here
         const fullscreenBtn = document.getElementById('fullscreenBtn'); // Fullscreen button
         const fullscreenIcon = document.getElementById('fullscreenIcon'); // Fullscreen icon SVG
         const fullscreenErrorMessage = document.getElementById('fullscreenErrorMessage'); // Fullscreen error message element
@@ -422,14 +422,39 @@
         fullscreenBtn.addEventListener('click', toggleFullscreen);
 
         /**
+         * Attempts to convert a Google Drive "view" link to a direct PDF export link.
+         * @param {string} url The original Google Drive URL.
+         * @returns {string} The converted URL, or the original URL if no conversion is needed/possible.
+         */
+        function getDirectPdfUrl(url) {
+            try {
+                const urlObj = new URL(url);
+                if (urlObj.hostname === 'drive.google.com') {
+                    const pathParts = urlObj.pathname.split('/');
+                    const fileIdIndex = pathParts.indexOf('d') + 1;
+                    if (fileIdIndex > 0 && fileIdIndex < pathParts.length) {
+                        const fileId = pathParts[fileIdIndex];
+                        return `https://drive.google.com/uc?id=${fileId}&export=download`;
+                    }
+                }
+            } catch (e) {
+                console.warn("Could not parse URL or convert Google Drive link:", e);
+            }
+            return url; // Return original URL if conversion fails or not a Google Drive link
+        }
+
+        /**
          * Loads the PDF document.
          * @param {string} url The URL of the PDF document.
          */
         async function loadPdf(url) {
             loadingMessage.classList.remove('hidden'); // Show loading message
             try {
+                // Attempt to convert Google Drive links to direct download links
+                const pdfUrl = url.includes('drive.google.com') ? getDirectPdfUrl(url) : url;
+
                 // Load the PDF document
-                const loadingTask = pdfjsLib.getDocument(url);
+                const loadingTask = pdfjsLib.getDocument(pdfUrl);
                 pdfDoc = await loadingTask.promise;
 
                 totalPagesNumSpan.textContent = pdfDoc.numPages; // Update total pages display
@@ -441,16 +466,19 @@
             }
         }
 
-        // Initial load: Load a default PDF
+        // Initial load: Check for 'url' parameter in the browser's URL
         window.onload = () => {
-            // Default PDF URL - a reliable public PDF for demonstration
+            const urlParams = new URLSearchParams(window.location.search);
+            const pdfLink = urlParams.get('url');
+
+            // Default PDF URL if no 'url' parameter is provided
             const defaultPdfUrl = 'https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf';
-            loadPdf(defaultPdfUrl);
 
-            // Removed the check that hides the fullscreen button
-            // fullscreenBtn.style.display = 'none'; // This line is removed
-            // console.warn('Fullscreen API is not enabled or allowed in this environment.');
-
+            if (pdfLink) {
+                loadPdf(pdfLink);
+            } else {
+                loadPdf(defaultPdfUrl); // Load the default PDF if no URL parameter is present
+            }
 
             // Handle window resize to re-render the current page with correct scaling
             let resizeTimer;

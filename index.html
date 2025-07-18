@@ -472,8 +472,8 @@
             const pdfLink = urlParams.get('url');
 
             // Default PDF URL if no 'url' parameter is provided
-            // This is a reliable public PDF for demonstration
-            const defaultPdfUrl = 'https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf';
+            // This now points to a placeholder relative path for GitHub Pages Option A
+            const defaultPdfUrl = 'pdfs/sample.pdf'; // Placeholder for a PDF in your 'pdfs' folder
 
             if (pdfLink) {
                 loadPdf(pdfLink);

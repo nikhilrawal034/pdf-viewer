@@ -171,7 +171,7 @@
         const pageInfo = document.getElementById('pageInfo');
         const controlsBottomRight = document.getElementById('controlsBottomRight'); // New container for zoom and fullscreen
         const zoomInBtn = document.getElementById('zoomIn');
-        const zoomOutBtn = document.getElementById('zoomOut'); // Corrected typo here
+        const zoomOutBtn = document.getElementById('zoomOut');
         const fullscreenBtn = document.getElementById('fullscreenBtn'); // Fullscreen button
         const fullscreenIcon = document.getElementById('fullscreenIcon'); // Fullscreen icon SVG
         const fullscreenErrorMessage = document.getElementById('fullscreenErrorMessage'); // Fullscreen error message element
@@ -268,7 +268,7 @@
                 }
             } catch (error) {
                 console.error('Error during page rendering:', error);
-                loadingMessage.textContent = 'Error loading page.';
+                loadingMessage.textContent = 'Error loading PDF.';
             } finally {
                 loadingMessage.classList.add('hidden'); // Hide loading message
                 currentPageNumSpan.textContent = num; // Update current page number display
@@ -462,7 +462,7 @@
                 renderPage(pageNum); // Render the first page
             } catch (error) {
                 console.error('Error loading PDF:', error);
-                loadingMessage.textContent = 'Error loading PDF. Please check the URL or ensure it\'s a publicly accessible PDF.';
+                loadingMessage.textContent = 'Error loading PDF. Please check the URL or ensure it\'s a publicly accessible PDF. Check console for details.';
             }
         }
 
@@ -472,6 +472,7 @@
             const pdfLink = urlParams.get('url');
 
             // Default PDF URL if no 'url' parameter is provided
+            // This is a reliable public PDF for demonstration
             const defaultPdfUrl = 'https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf';
 
             if (pdfLink) {
